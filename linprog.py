@@ -14,3 +14,10 @@ def pivot(N,B,A,b,c,v,l,e):
     :return:  N_,B_,A_,b_,c_,v_
     '''
     A_ = [[1,2]] #create matrix
+
+
+    def _pivot(self, mat, B, row, col):
+        mat[row] /= mat[row][col]
+        ids = np.arange(mat.shape[0]) != row
+        mat[ids] -= mat[row] * mat[ids, col:col + 1]  # for each i!= row do: mat[i]= mat[i] - mat[row] * mat[i][col]
+        B[row] = col
