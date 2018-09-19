@@ -18,7 +18,7 @@ def generate_samples(start,end,size):
     return samples
 
 # w=<2,2> b = 3
-samples = generate_samples(-300,300,5)
+samples = generate_samples(-300,300,100)
 print(samples)
 
 def plot_samples():
@@ -39,7 +39,7 @@ def perceptron(samples):
     w = np.array([0.0,0.0])
     b = 1.0
     lr = 0.5
-    epoch = 1000000
+    epoch = 1000
     for i in range(epoch):
 
         for value in samples:
@@ -59,5 +59,19 @@ def perceptron(samples):
 
 
     return w,b
-print(perceptron(samples))
 
+def generate_line(x_start,x_end,slope,b):
+
+    x_list = []
+    y_list = []
+    for i in range(1,100):
+        x = np.random.randint(x_start,x_end)
+        y = x *slope+b
+        x_list.append(x)
+        y_list.append(y)
+    return x_list,y_list
+
+w,b = perceptron(samples)
+line_x_y = generate_line(-300,300,-w[0]/w[1],b)
+plt.plot(line_x_y[0], line_x_y[1])
+plt.savefig('./static/test.png')
