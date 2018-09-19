@@ -1,15 +1,13 @@
 from flask import Flask
-import  pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import io
-import base64
 from flask import render_template
-import sys
-from flask import make_response
-import math
+from scipy.linalg import solve
 app = Flask(__name__)
 plt.switch_backend('agg') # solve main loop
+import sympy as sp
+
+
 
 
 def generate_point(start,end):
@@ -28,6 +26,15 @@ def generate_line(x_start,x_end,slope,b):
         x_list.append(x)
         y_list.append(y)
     return x_list,y_list
+
+def dual(y,size):
+    ## 无松弛情况下的对偶的最终形式
+    a = []
+    for i in size:
+        for j in size:
+            pass
+        pass
+    return
 
 
 
@@ -51,7 +58,6 @@ def plot_margins(margin_name):
 
         elif margin_name == 'geometric_margins':
             margin = np.dot(normal_unit_vector ,np.array(rand_x_y).T) + b/ normal_length
-        print(margin)
         if margin >0:
             marker = 'D'
         else:
@@ -59,11 +65,15 @@ def plot_margins(margin_name):
         plt.scatter(x=rand_x_y[0],y=rand_x_y[1], marker=marker)
 
         if margin > 0:
+            class_ = 'positive'
             margin *= 1
         else:
+            class_ = 'negative'
             margin *= -1
-        plt.annotate('fun_r={margin}'.format(margin=margin), rand_x_y)
 
+        plt.annotate('fun_r={margin}'.format(margin=margin), rand_x_y)
+        print('{class_},{margin_name}:{value}'.format(margin_name=margin_name,
+                                             value=margin,class_=class_))
     plt.plot(line_x_y[0],line_x_y[1])
 
     plt.title(margin_name)
@@ -71,6 +81,15 @@ def plot_margins(margin_name):
     plt.savefig('./static/test.png')
     plt.clf()
     return 0
+
+
+def max_margin_plane(samples_list):
+
+#一个样本点对应一个约束,也对应一个系数a
+
+def
+
+
 
 @app.route('/functional_margins')
 def functional_margin():

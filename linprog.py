@@ -51,7 +51,7 @@ class Simplex(object):
         x1 ,x2 ,x3 >= 0
        answer :-32
     """
-t = Simplex([-1, -14, -6])
+t = Simplex([1,14, 6],max_mode=True)
 t.add_constraint([1, 1, 1], 4)
 t.add_constraint([1, 0, 0], 2)
 t.add_constraint([0, 0, 1], 3)
