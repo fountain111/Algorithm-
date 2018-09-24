@@ -30,3 +30,6 @@ def hello():
 @app.route('/user/<username>')
 def show_user_profile(username):
     return 'username:{username}'.format(username=username)
+
+
+print(np.sign([-5., 4.5]))

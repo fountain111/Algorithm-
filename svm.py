@@ -9,6 +9,13 @@ import sympy as sp
 
 
 
+def dual(y,total_samples):
+    #min dual 的形式，
+    a = []*total_samples
+    for  i in range(total_samples):
+        for j in range(total_samples):
+            a[i]*a[j]*
+
 
 def generate_point(start,end):
 
@@ -83,11 +90,6 @@ def plot_margins(margin_name):
     return 0
 
 
-def max_margin_plane(samples_list):
-
-#一个样本点对应一个约束,也对应一个系数a
-
-def
 
 
 
