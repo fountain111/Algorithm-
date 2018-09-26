@@ -55,29 +55,27 @@ class Perceptron():
         return x_list, y_list
 
     def plot_superplane_ani(self,x,y,fig,ax):
-
-        x1 = x[0]
-        y1 = y[0]
-        print(x1)
-        print(y1)
-
+        #动态展示
         line, = ax.plot([], [], 'k-')
 
-        #plt.show(line)
         def init():
             line.set_data([],[])
             return line,
         def animate(i):
-            # update the data.
-            print(i)
-            line.set_xdata(x[i])
-            line.set_ydata(y[i])
+            # update the data
+            try:
+                line.set_xdata(x[i])
+                line.set_ydata(y[i])
+            except IndexError:
+                print('already done')
+                return line
             return  line,
         ani = animation.FuncAnimation(
-            fig, animate, init_func=init,
-              interval=100, blit=True, save_count=50)
+            fig, func=animate,init_func=init,
+              interval=10, blit=True, save_count=50)
 
         plt.show()
+        plt.plot(x[-1],y[-1])
         plt.savefig('./static/test.png')
 
 
