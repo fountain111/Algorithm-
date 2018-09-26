@@ -1,6 +1,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 '''
     Perceptron完成感知机的训练、画出分界面
@@ -11,13 +12,13 @@ import matplotlib.pyplot as plt
 
 class Perceptron():
     def __init__(self):
-        self.w = np.array([0.0,0.0])
-        self.b = np.float64(1.0)
-        self.lr = 0.5
-        self.epoch = 1000
+        self.w = np.array([-1.0,10000.0])
+        self.b = np.float64(100.0)
+        self.lr = 0.001
+        self.epoch = 10000
     def train(self,samples):
-        w = self.w
-        b= self.b
+        x_list= []
+        y_list = []
         for i in range(self.epoch):
 
             for value in samples:
@@ -29,11 +30,13 @@ class Perceptron():
                 else:
                     predict = -1
                 if (y * predict <= 0):
-                    w += self.lr*y*x
-                    b = b + self.lr * y
-                    print(i, w, b)
-
-        return w, b
+                    self.w += self.lr*y*x
+                    self.b = self.b + self.lr * y
+            x_,y_ = self.super_plane(-300,300)
+            print(i)
+            x_list.append(x_)
+            y_list.append(y_)
+        return x_list,y_list
 
     def super_plane(self,x_start, x_end):
         #直线作为分界面。
@@ -51,11 +54,32 @@ class Perceptron():
             y_list.append(y)
         return x_list, y_list
 
-    def plot_superplane(self,start=-300,end=300):
-        #画出分界面
-        line_x_y = self.super_plane(start,end)
-        plt.plot(line_x_y[0], line_x_y[1])
+    def plot_superplane_ani(self,x,y,fig,ax):
+
+        x1 = x[0]
+        y1 = y[0]
+        print(x1)
+        print(y1)
+
+        line, = ax.plot([], [], 'k-')
+
+        #plt.show(line)
+        def init():
+            line.set_data([],[])
+            return line,
+        def animate(i):
+            # update the data.
+            print(i)
+            line.set_xdata(x[i])
+            line.set_ydata(y[i])
+            return  line,
+        ani = animation.FuncAnimation(
+            fig, animate, init_func=init,
+              interval=100, blit=True, save_count=50)
+
+        plt.show()
         plt.savefig('./static/test.png')
+
 
 
 class Sammples():
@@ -70,6 +94,8 @@ class Sammples():
         '''
 
         samples = []
+        x_list= []
+        y_list = []
         w = np.mat('1,1')
         b = 10
 
@@ -81,9 +107,12 @@ class Sammples():
             else:
                 y = -1
             samples.append([rand_x,y])
-        return samples
+            x_list.append(rand_x)
+            y_list.append(y)
+        return samples,x_list,y_list
 
     def plot_samples(self,samples):
+        fig, ax = plt.subplots()
         # 注意,只实现二维平面,默认是样本维度中的第一、二维度展现,标签只能是两类,正负样本。
         for value in samples:
             if value[1] == 1:
@@ -92,10 +121,11 @@ class Sammples():
             else:
                 marker = 'o'
 
-            plt.scatter(value[0][0], value[0][1],marker=marker)
+            ax.scatter(value[0][0], value[0][1],marker=marker)
             #print((value[0][0],value[0][1]))
         plt.title('samples')
         plt.savefig('./static/test.png')
+        return fig,ax
 
 
 
