@@ -100,10 +100,13 @@ class Sammples():
         for i in range(size):
 
             rand_x  = [np.float64(np.random.randint(start,end)) for  i in range(0,dimm)]
-            if w.dot(np.array(rand_x)) +b  > 0:
+            y_ =  w.dot(np.array(rand_x))+b
+            if y_ > 1:
                 y = 1
-            else:
+            elif y_<-1:
                 y = -1
+            else:
+                continue
             samples.append([rand_x,y])
             x_list.append(rand_x)
             y_list.append(y)

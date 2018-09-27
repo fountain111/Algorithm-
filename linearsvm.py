@@ -7,10 +7,10 @@ class LinearSvm():
     def __init__(self):
         self.w = np.array([10.0,10000.0])
         self.b = np.float64(2.0)
-        self.lr = 0.01
-        self.epoch = 1000
+        self.lr = 0.001
+        self.epoch = 10000
         self.bath_size = 10
-        self.c = 1
+        self.c = 0.1
         self.xi = 0
     def objective(self):
         #目标函数
@@ -22,8 +22,8 @@ class LinearSvm():
         #的样本之间震荡,比较合理的方法是对一批样本的梯度取平均,
         #对于正确分类的样本没必要进行梯度下降,因为一般对w求偏导之后,正确分类的样本的偏导等于0,
         # 那么如果在各个维度上都采用一样的学习率,只是对w的线性组合,也没有其他依据能对w进行寻优。
-        if hard_margin:
-            self.c = 1
+        #if hard_margin:
+         #   self.c = 1
 
         x = np.asarray(samples[0],np.float32)
         y = np.asarray(samples[1],np.float32)

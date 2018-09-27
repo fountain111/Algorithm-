@@ -8,7 +8,7 @@ linearsvm = LinearSvm()
 
 s = Sammples()
 
-samples,x,y = s.generate_samples(-300,300,50)
+samples,x,y = s.generate_samples(-300,300,100)
 
 
 fig,ax = s.plot_samples(samples)
