@@ -38,6 +38,11 @@ class Perceptron():
             y_list.append(y_)
         return x_list,y_list
 
+    def train_kernel(self):
+        # perceptron的对偶形式可以凑成kernel出来,这是个很强的技巧,
+
+
+
     def super_plane(self,x_start, x_end):
         #直线作为分界面。
         w = self.w

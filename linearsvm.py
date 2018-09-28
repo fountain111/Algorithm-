@@ -7,7 +7,7 @@ class LinearSvm():
     def __init__(self):
         self.w = np.array([10.0,10000.0])
         self.b = np.float64(2.0)
-        self.lr = 0.001
+        self.lr = 0.1
         self.epoch = 10000
         self.bath_size = 10
         self.c = 0.1
@@ -51,6 +51,7 @@ class LinearSvm():
         self.w *= 1-self.lr
 
         self.w +=  np.mean(self.c*y[:,None]*x,axis=0)
+        self.b += np.mean(self.lr*self.c*y,axis=0)
 
         return
 
