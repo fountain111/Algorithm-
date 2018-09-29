@@ -38,8 +38,19 @@ class Perceptron():
             y_list.append(y_)
         return x_list,y_list
 
-    def train_kernel(self):
-        # perceptron的对偶形式可以凑成kernel出来,这是个很强的技巧,
+
+    def poly(self,x,y,p):
+        #使用poly核,默认+1,
+        #一搬用核的话,很多情况下是用对偶对的
+
+        return ((x.dot(y) + 1) )**p
+
+    def rbf(self,x,y,gamma):
+
+        return
+
+        # perceptron的对偶形式可以凑成kernel出来,这是个很强的技巧
+        # 使用rbf核
 
 
 
