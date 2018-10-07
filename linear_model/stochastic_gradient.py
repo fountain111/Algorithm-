@@ -1,39 +1,51 @@
-class BaseSGD():
-
-    def __init__(self,loss,penalty='l2',alpha=0.001,c=1.0,
-                 learning_rate  = 'optimal'):
-        self.loss = loss
-        self.penalty = penalty
-        self.alpha = alpha
-        self.c = c
-        self.learning_rate = learning_rate
-
-    @abstractmethod
-    def fit(self,x,y):
-        """ Fit ,don't instance"""
-
-    def _validate_params(self):
-
-        if self.loss not in self.loss:
-            pass
+import numpy as np
 
 
+class KP:
+    def __init__(self):
+        self._x = None
+        self._alpha = self._b = self._kernel = None
+
+    # 定义多项式核函数
+    @staticmethod
+    def _poly(x, y, p=4):
+        return (x.dot(y.T) + 1) ** p
+
+    # 定义 rbf 核函数
+    @staticmethod
+    def _rbf(x, y, gamma):
+        return np.exp(-gamma * np.sum((x[..., None, :] - y) ** 2, axis=2))
+
+    def fit(self, x, y, kernel="poly", p=None, gamma=None, lr=0.001, batch_size=128, epoch=10000):
+        x, y = np.asarray(x, np.float32), np.asarray(y, np.float32)
+        if kernel == "poly":
+            p = 4 if p is None else p
+            self._kernel = lambda x_, y_: self._poly(x_, y_, p)
+        elif kernel == "rbf":
+            gamma = 1 / x.shape[1] if gamma is None else gamma
+            self._kernel = lambda x_, y_: self._rbf(x_, y_, gamma)
+        else:
+            raise NotImplementedError("Kernel '{}' has not defined".format(kernel))
+        self._alpha = np.zeros(len(x))
+        self._b = 0.
+        self._x = x
+        k_mat = self._kernel(x, x)
+        for _ in range(epoch):
+            indices = np.random.permutation(len(y))[:batch_size]
+            k_mat_batch, y_batch = k_mat[indices], y[indices]
+            err = -y_batch * (k_mat_batch.dot(self._alpha) + self._b)
+            if np.max(err) < 0:
+                continue
+            mask = err >= 0
+            delta = lr * y_batch[mask]
+            self._alpha += np.sum(delta[..., None] * k_mat_batch[mask], axis=0)
+            self._b += np.sum(delta)
 
 
-
-class BaseSGDClassifier(six.with_metaclass(ABCMeta, BaseSGD,
-                                           LinearClassifierMixin)):
-
-
-    loss_functions = {
-    "hinge": (Hinge, 1.0),
-    "squared_hinge": (SquaredHinge, 1.0),
-    "perceptron": (Hinge, 0.0),
-    "log": (Log,),
-    "modified_huber": (ModifiedHuber,),
-    "squared_loss": (SquaredLoss,),
-    "huber": (Huber, DEFAULT_EPSILON),
-    "epsilon_insensitive": (EpsilonInsensitive, DEFAULT_EPSILON),
-    "squared_epsilon_insensitive": (SquaredEpsilonInsensitive,
-                            DEFAULT_EPSILON),
-}
+    def predict(self, x, raw=False):
+        x = np.atleast_2d(x).astype(np.float32)
+        k_mat = self._kernel(self._x, x)
+        y_pred = self._alpha.dot(k_mat) + self._b
+        if raw:
+            return y_pred
+        return np.sign(y_pred).astype(np.float32)

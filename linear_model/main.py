@@ -1,10 +1,20 @@
 from sklearn import datasets
 from perceptron import *
-iris = datasets.load_iris()
+
+#from linear_model.stochastic_gradient import *
+cancer = datasets.load_breast_cancer()
 digits = datasets.load_digits()
 #print(type(digits.target))
-x = digits.data
-y = digits.target
-perceptron = Perceptron()
+x = cancer.data
+y = cancer.target
 
-perceptron.fit(x,y)
+for i,value in enumerate(y):
+    if value ==0:
+        y[i]=-1
+#perceptron = Perceptron()
+
+perceptron = Perceptron()
+perceptron.fit(x,y,epoch=100000,lr=0.1)
+
+print("准确率：{:8.6} %".format((perceptron.predict(x) == y).mean() * 100))
+
