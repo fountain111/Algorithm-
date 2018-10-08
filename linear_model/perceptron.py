@@ -46,29 +46,20 @@ class Perceptron():
                 #最好不要在这里判断是否是dual，否则每次循环都会带来开销
                 indices =np.random.permutation(len(y))[:batch_size]
                 y_batch,k_mat_batch = y[indices],k_mat[indices]
-                err = y_batch*(k_mat_batch.dot(self._alpha)+self._b)
-                if np.min(err) >0:
+                err = -y_batch*(k_mat_batch.dot(self._alpha*y)+self._b)
+                if np.max(err) <0:
                     print('no missClass,epoch = {epoch}'.format(epoch=epoch_index))
                     continue
-                mask = err <=0
-                self._alpha += np.sum(y_batch[mask][:,None] *lr* (k_mat_batch[mask]),axis=0)
+                mask = err >=0
+                self._alpha += np.sum(y_batch[mask][:,None] *lr*(k_mat_batch[mask]),axis=0)#这里有问题，重新推到一下梯度形式
                 self._b += np.sum(lr * y)
                 #print(self._alpha)
                 #print(self._b)
         else:
             #primal loop
             for epoch_index in range(epoch):
-                indices = np.random.permutation(len(y))[:batch_size]
-                y_batch, k_mat_batch = y[indices], x[indices]
-                err = y_batch * (k_mat_batch.dot(self._alpha) + self._b)
-                if np.min(err) > 0:
-                    print('no missClass,epoch = {epoch}'.format(epoch=epoch_index))
-                    continue
-                mask = err <= 0
-                self._alpha += np.sum(y_batch[mask][:, None] * lr * (k_mat_batch[mask]), axis=0)
-                self._b += np.sum(lr * y)
-                # print(self._alpha)
-                # print(self._b)
+
+               pass
 
     def predict(self,x):
         k_mat = self._kernel(x,x)
