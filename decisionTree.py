@@ -1,7 +1,8 @@
 from entropy import *
 import entropy
-
+import numpy as np
 import math
+
 class ID3_trees():
     '''
     ID3
@@ -11,7 +12,16 @@ class ID3_trees():
         #self.label = label
         return
 
-    def createTrees(self,dataSet,fea_name_list):
+    def _create_dataSets(self):
+        dataSet = [[1, 1, 'yes'],
+                   [1, 1, 'yes'],
+                   [1, 0, 'no'],
+                   [0, 1, 'no'],
+                   [0, 1, 'no']]
+        fea_names = ['no surfacing', 'flippers']
+        return dataSet, fea_names
+
+    def createTrees(self,dataSet,fea_names):
         '''
         return tress or label value,
 
@@ -19,164 +29,128 @@ class ID3_trees():
         :param fea_name_list:
         :return:
         '''
-        class_list =
-            return
+        dataSet = np.asarray(dataSet)
+        #print(dataSet[:,2])
 
-        tree = {best_fea_name,{}}
+        labels = dataSet[:,-1]
+        unique_labels,counts = np.unique(labels,return_counts=True)
+        if len(labels) == counts[0]:
+            print('split done,return label=',unique_labels[0])
+            return unique_labels[0]
 
-        tree = createTree(dataSet,fea_name_list)
+        if dataSet.shape[1] == 1:
+            print('stop return2 dataSet shape=1',)
+            return self.majorityCnt(dataSet)
+        #print(dataSet.shape)
+        best_fea_index = self.chooseBestFeatureToSplit(dataSet)
+        best_fea_name = fea_names[best_fea_index]
+        print('best fea=',best_fea_index)
+        #print('before',fea_names)
+       # print('after',fea_names)
+
+        bestValues =dataSet[:,best_fea_index]
+        #print('bestValues',best_fea_index)
+        tree = {best_fea_name:{}}
+        del fea_names[best_fea_index]
+        print('best fea name=',best_fea_name)  # best fea index 可能一直是0,但name会变。
+        for value in np.unique(bestValues):
+            #sub_fea_names = fea_names[:]
+            sub_dataSet = self.splitDataSet(dataSet,best_fea_index,value)
+            print('value=',value)
+            print(sub_dataSet.shape)
+            tree[best_fea_name][value] = self.createTrees(sub_dataSet,fea_names)
 
         return tree
 
 
-    def _label_entropy(self,label,base=2):
+    def splitDataSet(self,dataSet,index,value):
         '''
-        binary
 
-        :param label: only support binary for now
+
+        :param dataSet:
+        :param index:
+        :param value:
+        :return:  index是value的其他列的值，并删除Index列
+        '''
+        new_list = []
+        for row in dataSet:
+            if (row[index] == value):
+             new_list.append(row)
+        new_array = np.asarray(new_list)
+        return np.delete(new_array,index,axis=1)
+
+
+
+    def chooseBestFeatureToSplit(self,dataSet):
+        '''
+        Traversal all fea,find best information Gain
+        :param dataSet:array_like,list
+        :return: best fea index
+        '''
+
+        dataSet = np.asarray(dataSet)
+        best_informationGain = 0
+        best_index = None
+        baseEntropy = self.calcEntropy(dataSet)
+        #print('base entropy=',baseEntropy)
+        fea_lens = dataSet.shape[1]-1
+        for i in range(fea_lens):
+            unique_feas = np.unique(dataSet[:,i])
+            condition_entropy = 0
+            #print('unique_feas=',unique_feas)
+            for value in unique_feas:
+                sub_dataSet = self.splitDataSet(dataSet,i,value)
+              #  print('sub_dataSet shape =',sub_dataSet.shape)
+                prob = sub_dataSet.shape[0]/dataSet.shape[0]  # 随机变量P（X）的概率
+                condition_entropy += prob*self.calcEntropy(sub_dataSet)   # 条件熵概率
+             #   print('condition entropy=',condition_entropy)
+            information_gain = baseEntropy - condition_entropy
+            #print(information_gain)
+            if best_informationGain < information_gain:
+                best_informationGain  = information_gain
+                best_index = i
+        return best_index
+
+    def calcEntropy(self,dataSet):
+        '''
+        其实没必要带整个数据集进去，
+        labels的信息熵
+        :param dataSet:
+        :return: entropy
+        '''
+
+        dataSet = np.asarray(dataSet)
+        labels = dataSet[:,-1]
+        _,counts = np.unique(labels,return_counts=True)
+        #print(list(map(lambda x:x/dataSet.shape[0],counts)))
+
+        return_entropy = entropy._entropy(list(map( lambda x:x/dataSet.shape[0],counts)),base=2)
+        #print(return_entropy)
+        return return_entropy
+
+
+    def majorityCnt(self,dataSet):
+        '''
+        majority wins, if equal ,random choose,print warning,
+
+        :param dataSet:
         :return:
         '''
-        total_len = len(label)
-        positives = 0
-        negatives = 0
-        for value in label:
-            if value == 1:
-                positives+=1
-            else:
-                negatives+=1
 
-        p_postive = positives/total_len
-        p_negative = negatives/total_len
-        entropy_label =entropy._entropy([p_postive,p_negative],base)
-        print(entropy_label)
-        print(positives,negatives,total_len)
-        return  entropy_label
+        values,counts = np.unique(dataSet[:,-1],return_counts=True)
 
-    def _ig(self):
-        '''
-        information gain,
+        indices = np.argmax(counts)
+        if len(indices>1):
+            print('majority euqal ,random pick ')
+            indices = indices[0]
 
-        IG = H(T) - H(T/a)
-        :return:
-        '''
+        label = values[indices]
 
-
-    def _condition_entropy(self):
-        '''
-        calculate condition entropy H(Y|X)
-
-
-        :return:
-        '''
-
-
-    def _fit(self,array,label):
-        ''''
-        array:fea array
-
-        '''
-
-        for col in array:
-            #every fea in fea_list,
-            #cal ig for every fea,
-            #find label in every fea
-            print()
-        return
-
-def createDataSet():
-    dataSet = [[1, 1, 'yes'], [1, 1, 'yes'], [1, 0, 'no'], [0, 1, 'no'], [0, 1, 'no']]
-    dataSet = np.random.random_integers(1,10,(4,5)).tolist()
-    print(dataSet)
-    fea_list = ['no sufacing', 'flippers','ok','nook','r1']
-    return dataSet, fea_list
-
-def calcShannonEnt(dataSet):
-    numEntries = len(dataSet)
-    labelCounts = {}
-    for featVec in dataSet:
-        currentLabel = featVec[-1]
-        if currentLabel not in labelCounts.keys():
-            labelCounts.setdefault(currentLabel, 0)
-        labelCounts[currentLabel] += 1
-    #print(labelCounts)
-
-    shannonEnt = 0.0
-    for key in labelCounts:
-        prob = float(labelCounts[key]) / numEntries
-        shannonEnt += prob * math.log2(1 / prob)
-    return shannonEnt
-
-
-def splitDataSet(dataSet, axis, value):
-    #对一条条数据遍历，找到某条数据记录是否含有某个值（axis位置的value）
-    #如果找到，就跳过这个值，重新拼装一条记录，最后把所有记录放在新的list里。
-    retDataSet = []
-    for featVec in dataSet:
-        print(featVec)
-        print(featVec[axis])
-        if featVec[axis] == value:
-            reduceFeatVec = featVec[:axis]
-            reduceFeatVec.extend(featVec[axis + 1:])
-            retDataSet.append(reduceFeatVec)
-    return retDataSet  #返回不含划分特征的子集
-
-def chooseBestFeatureToSplit(dataSet):
-    numFeature = len(dataSet[0]) - 1
-    #print(numFeature)
-    baseEntropy = calcShannonEnt(dataSet)
-    bestInforGain = 0
-    bestFeature = -1
-
-    for i in range(numFeature):
-        featList = [number[i] for number in dataSet] #得到某个特征下所有值
-        uniqualVals = set(featList) #set无重复的属性特征值
-        newEntrogy = 0
-
-        #求和
-        for value in uniqualVals:
-            subDataSet = splitDataSet(dataSet, i, value)
-            prob = len(subDataSet) / float(len(dataSet)) #即p(t)
-            newEntrogy += prob * calcShannonEnt(subDataSet) #对各子集求香农墒
-
-        infoGain = baseEntropy - newEntrogy #计算信息增益
-
-        print(infoGain)
-
-        # 最大信息增益
-        if infoGain > bestInforGain:
-            bestInforGain = infoGain
-            bestFeature = i
-    return bestFeature
-
-def createTree(dataSet, fea_name_list):
-    classList = [example[-1] for example in dataSet] #dataset的最后一个特征，一列
-    # print(dataSet)
-    # print(classList)
-    # 类别相同，停止划分
-    if classList.count(classList[0]) == len(classList):
-        return classList[0]
-
-    # 判断是否遍历完所有的特征,是，返回个数最多的类别
-    #if len(dataSet[0]) == 1:
-     #   return majorityCnt(classList)
-
-    #按照信息增益最高选择分类特征属性
-    bestFeat = chooseBestFeatureToSplit(dataSet) #分类编号
-    bestFeatLabel = fea_name_list[bestFeat]  #该特征的name
-    myTree = {bestFeatLabel: {}}
-    del (fea_name_list[bestFeat]) #移除该label
-
-    featValues = [example[bestFeat] for example in dataSet]
-    uniqueVals = set(featValues)
-    for value in uniqueVals:
-        subLabels = fea_name_list[:]  #子集合
-        #构建数据的子集合，并进行递归
-        myTree[bestFeatLabel][value] = createTree(splitDataSet(dataSet, bestFeat, value), subLabels)
-    return myTree
+        print('marjority vote=',label)
 
 
 
-
+        return label
 
 
 def main():
@@ -187,10 +161,11 @@ def main():
    # for value in array.T:
     #    print(value)
 
-    dataset,labels = createDataSet()
+    dataset,fea_names = model._create_dataSets()
+    trees = model.createTrees(dataset,fea_names)
     #calcShannonEnt(dataset)
     #splitDataSet(dataset,1,'e')
-    tress = createTree(dataset,labels)
+    print(trees)
 if __name__ == '__main__':
     main()
 
