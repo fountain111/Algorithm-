@@ -19,7 +19,7 @@ class ID3_trees():
 
                    ]
 
-        fea_names = ['no surfacing', 'flippers']
+        fea_names = ['fea1', 'fea2']
 
 
         return dataSet, fea_names
@@ -46,6 +46,7 @@ class ID3_trees():
             return self.majorityCnt(dataSet)
         #print(dataSet.shape)
         best_fea_index = self.chooseBestFeatureToSplit(dataSet)
+        #best_fea_index = self.chooseBestFeatureToSplit_condition_entropy(dataSet)
         best_fea_name = fea_names[best_fea_index]
         #print('best fea=',best_fea_index)
         #print('before',fea_names)
@@ -113,6 +114,40 @@ class ID3_trees():
                 best_informationGain  = information_gain
                 best_index = i
         return best_index
+
+
+
+
+    def chooseBestFeatureToSplit_condition_entropy(self,dataSet):
+        '''
+        Traversal all fea,find best information Gain
+        :param dataSet:array_like,list
+        :return: best fea index
+        '''
+
+        dataSet = np.asarray(dataSet)
+        best_informationGain = 100000000
+        best_index = None
+        baseEntropy = self.calcEntropy(dataSet)
+        #print('base entropy=',baseEntropy)
+        fea_lens = dataSet.shape[1]-1
+        for i in range(fea_lens):
+            unique_feas = np.unique(dataSet[:,i])
+            condition_entropy = 0
+            #print('unique_feas=',unique_feas)
+            for value in unique_feas:
+                sub_dataSet = self.splitDataSet(dataSet,i,value)
+              #  print('sub_dataSet shape =',sub_dataSet.shape)
+                prob = sub_dataSet.shape[0]/dataSet.shape[0]  # 随机变量P（X）的概率
+                condition_entropy += prob*self.calcEntropy(sub_dataSet)   # 条件熵概率
+             #   print('condition entropy=',condition_entropy)
+            information_gain = condition_entropy
+            #print(information_gain)
+            if best_informationGain > information_gain:
+                best_informationGain  = information_gain
+                best_index = i
+        return best_index
+
 
     def calcEntropy(self,dataSet):
         '''
@@ -229,7 +264,7 @@ def main():
     #print('a',fea_names.index('no surfacing'))
     #print(dataset[0])
     labels = model.predict(trees,fea_names,np.asarray(dataset)[:,:-1])
-
+    print(labels)
 
 if __name__ == '__main__':
     main()
