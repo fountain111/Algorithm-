@@ -1,7 +1,5 @@
-from entropy import *
 import entropy
 import numpy as np
-import math
 
 class ID3_trees():
     '''
@@ -17,8 +15,13 @@ class ID3_trees():
                    [1, 1, 'yes'],
                    [1, 0, 'no'],
                    [0, 1, 'no'],
-                   [0, 1, 'no']]
+                   [0, 1, 'no'],
+
+                   ]
+
         fea_names = ['no surfacing', 'flippers']
+
+
         return dataSet, fea_names
 
     def createTrees(self,dataSet,fea_names):
@@ -35,7 +38,7 @@ class ID3_trees():
         labels = dataSet[:,-1]
         unique_labels,counts = np.unique(labels,return_counts=True)
         if len(labels) == counts[0]:
-            print('split done,return label=',unique_labels[0])
+            #print('split done,return label=',unique_labels[0])
             return unique_labels[0]
 
         if dataSet.shape[1] == 1:
@@ -44,7 +47,7 @@ class ID3_trees():
         #print(dataSet.shape)
         best_fea_index = self.chooseBestFeatureToSplit(dataSet)
         best_fea_name = fea_names[best_fea_index]
-        print('best fea=',best_fea_index)
+        #print('best fea=',best_fea_index)
         #print('before',fea_names)
        # print('after',fea_names)
 
@@ -52,12 +55,12 @@ class ID3_trees():
         #print('bestValues',best_fea_index)
         tree = {best_fea_name:{}}
         del fea_names[best_fea_index]
-        print('best fea name=',best_fea_name)  # best fea index 可能一直是0,但name会变。
+        #print('best fea name=',best_fea_name)  # best fea index 可能一直是0,但name会变。
         for value in np.unique(bestValues):
             #sub_fea_names = fea_names[:]
             sub_dataSet = self.splitDataSet(dataSet,best_fea_index,value)
-            print('value=',value)
-            print(sub_dataSet.shape)
+         #   print('value=',value)
+          #  print(sub_dataSet.shape)
             tree[best_fea_name][value] = self.createTrees(sub_dataSet,fea_names)
 
         return tree
@@ -140,7 +143,7 @@ class ID3_trees():
         values,counts = np.unique(dataSet[:,-1],return_counts=True)
 
         indices = np.argmax(counts)
-        if len(indices>1):
+        if isinstance(indices,list):
             print('majority euqal ,random pick ')
             indices = indices[0]
 
@@ -152,20 +155,82 @@ class ID3_trees():
 
         return label
 
+    def fit(self,dataSet,fea_names):
+
+
+        return self.createTrees(dataSet,fea_names)
+
+
+    def _predict_example(self,trees,fea_names,test_row):
+        '''
+        predict a single example(row)
+
+        :param trees:dict,
+        :param fea_names:
+        :param test_data: array_like
+        :return: label of class
+        '''
+        #test_row = list(test_row)
+       # print(test_row)
+
+        first_key = list(trees.keys())[0]
+
+        next_tree = trees[first_key]  # next tree or label
+
+        fea_index = fea_names.index(first_key)
+        #print(fea_index)
+        #print(test_row)
+        key = test_row[fea_index]
+
+        valueInRow = next_tree[key]
+
+        if isinstance(valueInRow,dict):
+            class_label = self._predict_example(valueInRow,fea_names,test_row)
+        else:
+            class_label = valueInRow
+        #print(class_label)
+        return class_label
+
+
+    def predict(self,trees,fea_names,test_data):
+        '''
+
+
+        :param trees:
+        :param fea_names:
+        :param test_data: array_like
+        :return:
+        '''
+
+        test_data = np.asarray(test_data)
+        try:
+            test_data.shape[1]
+        except IndexError:
+            test_data = test_data.reshape(1,test_data.shape[0])
+            print('reshape data',test_data)
+            pass
+        labels = list(map(lambda x: self._predict_example(trees, fea_names, x), test_data))
+        #print(labels)
+        return labels
 
 def main():
     model = ID3_trees()
-    label = [0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1,1, 0]
+    #label = [0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1,1, 0]
     #model._label_entropy(label,base=2)
     array = np.random.random((3,4))
    # for value in array.T:
     #    print(value)
 
     dataset,fea_names = model._create_dataSets()
-    trees = model.createTrees(dataset,fea_names)
+    trees = model.fit(dataset,fea_names.copy())
     #calcShannonEnt(dataset)
     #splitDataSet(dataset,1,'e')
-    print(trees)
+    #print('fea names',fea_names)
+    #print('a',fea_names.index('no surfacing'))
+    #print(dataset[0])
+    labels = model.predict(trees,fea_names,np.asarray(dataset)[:,:-1])
+
+
 if __name__ == '__main__':
     main()
 
