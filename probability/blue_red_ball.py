@@ -29,8 +29,8 @@ def blue_red_box(argv):
                 double_red +=1
                 prob = double_red/counts
                 print(prob,i)
+
 '''
-```
 假设有两箱同种零件：
 第一箱内装有50件，其中10件一等品；
 第二箱内30件，其中18件一等品。
@@ -38,29 +38,44 @@ def blue_red_box(argv):
 
 1）先取出的零件是一等品的概率p；
 2）在先取出的零件是一等品的条件下，第二次取出的零件仍然是一等品的条件概率q。
+
+#1 = 一等品, 0=其他
+
 '''
 
-def components():
+def components(q1=True,q2=True):
     box_1 = [1 for i in range(10)] + [0 for i in range(40)]
-    box_2 = [1 for i in range(18)]  + [0 for i  in range(12)]
+    box_2 = [1 for i in range(18)] + [0 for i in range(12)]
 
-    box_list = [box_1,box_2]
-    for box in [box_1,box_2]:
+    box_list = [box_1, box_2]
+    for box in [box_1, box_2]:
         np.random.shuffle(box)
+    first_is_1_counts = 0
 
-    for i in range(100000):
-        box_id = np.random.randint(0,2)
+    for i in range(10000000):
+        box_id = np.random.randint(0, 2)
         box = box_list[box_id]
-        if box_id == 0:
+        if q1:
 
-            component_id = np.random.randint(0,50)
-        else:
-            component_id=np.random.randint(0,30)
+            if box_id == 0:
 
-        first_component =
+                component_id = np.random.randint(0,50)
+            else:
+                component_id=np.random.randint(0,30)
+
+            first_component =  box[component_id]
+
+            if first_component==1:
+                first_is_1_counts+=1
+                print('question 1=',first_is_1_counts/i)
+
+        if q2:
 
 
-    print(box_2)
+
+
+
+
 def main(argv):
     components()
 
